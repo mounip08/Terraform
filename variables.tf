@@ -32,7 +32,7 @@ variable "subnet_1_id" {
 
 variable "key_name" {
   description = "The name of the SSH key pair"
-  type        = string
+  type        = string  
 }
 variable "subnet_2_id" {
   description = "for subnet 2 id"
