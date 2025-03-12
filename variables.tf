@@ -30,12 +30,13 @@ variable "subnet_1_id" {
   default    = "subnet-0739686a07685b631"
 }
 
-variable "key_name" {
-  description = "The name of the SSH key pair"
-  type        = string  
-}
+
 variable "subnet_2_id" {
   description = "for subnet 2 id"
   type       = string  
   default    = "subnet-0472fa04e525a0a69"
+}
+variable "key_name" {
+  description = "The name of the SSH key pair"
+  type        = string  
 }
