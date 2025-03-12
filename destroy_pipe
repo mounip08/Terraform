@@ -1,0 +1,65 @@
+pipeline {
+    parameters {
+        booleanParam(name: 'autoDestroy', defaultValue: false, description: 'Automatically destroy without approval?')
+    } 
+            
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+    }
+
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    dir("terraform_new") {
+                        git branch: 'main', url: "https://github.com/Rakesh-k-ops/Final_terra.git"
+                    }
+                }
+            }
+        }
+
+        stage('Destroy Plan') {
+            steps {
+                withEnv([
+                    "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
+                    "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}"
+                ]) {
+                    dir("terraform") {
+                        sh 'terraform init'
+                        sh 'terraform plan -destroy -var-file=terraform.tfvars -out=tfplan-destroy'
+                        sh 'terraform show -no-color tfplan-destroy > tfplan-destroy.txt'
+                    }
+                }
+            }
+        }
+
+        /* stage('Approval') {
+            when {
+                not { equals expected: true, actual: params.autoDestroy }
+            }
+            steps {
+                script {
+                    def plan = readFile 'terraform/tfplan-destroy.txt'
+                    input message: "Do you want to destroy the infrastructure?",
+                    parameters: [text(name: 'Destroy Plan', description: 'Please review the destroy plan', defaultValue: plan)]
+                }
+            }
+        } */
+
+        stage('Destroy Apply') {
+            steps {
+                withEnv([
+                    "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
+                    "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}"
+                ]) {
+                    dir("terraform") {
+                        sh 'terraform apply -destroy -input=false tfplan-destroy'
+                    }
+                }
+            }
+        }
+    }
+}
