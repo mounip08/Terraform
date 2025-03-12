@@ -165,3 +165,30 @@ resource "aws_autoscaling_attachment" "asg_attachment" {
   autoscaling_group_name = aws_autoscaling_group.app_asg.id
   lb_target_group_arn    = aws_lb_target_group.app_tg.arn
 }
+
+
+# Create Two Standalone EC2 Instances
+resource "aws_instance" "web_instance_1" {
+  ami             = var.ami_id
+  instance_type   = "t2.micro"
+  subnet_id       = aws_subnet.public[0].id
+  key_name        = var.key_name
+  security_groups = [aws_security_group.app_sg.id]
+
+  tags = {
+    Name = "WebServer-1"
+  }
+}
+
+resource "aws_instance" "web_instance_2" {
+  ami             = var.ami_id
+  instance_type   = "t2.micro"
+  subnet_id       = aws_subnet.public[1].id
+  key_name        = var.key_name
+  security_groups = [aws_security_group.app_sg.id]
+
+  tags = {
+    Name = "WebServer-2"
+  }
+}
+
